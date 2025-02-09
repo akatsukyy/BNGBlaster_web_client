@@ -53,6 +53,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+    - name: Downcase REPO
+      run: |
+        echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
     - name: Pull Docker image
       run: docker pull ghcr.io/${{ env.REPO }}:latest
     - name: Run bngblaster app
@@ -73,15 +76,15 @@ jobs:
         chmod +x geckodriver
         sudo mv geckodriver /usr/local/bin/
         robot tests/
-    # - name: Send email with test results
-    #   uses: dawidd6/action-send-mail@v3
-    #   with:
-    #     server_address: smtp.gmail.com
-    #     server_port: 465
-    #     username: ${{ secrets.MAIL_USERNAME }}
-    #     password: ${{ secrets.MAIL_PASSWORD }}
-    #     subject: "Test Result for BNGBLASTER App"
-    #     body: |
-    #       Robot Test Result: ${{ steps.robot_test.outcome }}
-    #     to: ${{ secrets.MAIL_USERNAME }}
-    #     from: CI/CD Pipeline
+    - name: Send email with test results
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        username: ${{ secrets.MAIL_USERNAME }}
+        password: ${{ secrets.MAIL_PASSWORD }}
+        subject: "Test Result for BNGBLASTER App"
+        body: |
+          Robot Test Result Of BNGLASTER: ${{ steps.robot_test.outcome }}
+        to: ${{ secrets.MAIL_USERNAME }}
+        from: CI/CD Pipeline
