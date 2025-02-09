@@ -87,4 +87,4 @@ jobs:
         body: |
           Robot Test Result Of BNGLASTER: ${{ steps.robot_test.outcome }}
         to: ${{ secrets.MAIL_USERNAME }}
-        from: CI/CD Pipeline
+        from: workflow of akatsukyy/bngblaster_web_client
