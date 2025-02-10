@@ -55,8 +55,8 @@ jobs:
         echo $PATH
         echo "Checking /usr/local/bin:"
         ls -lah /usr/local/bin
-        echo "Checking $HOME/.local/bin:"
-        sudo ls -lah $HOME/.local/bin
+        # echo "Checking $HOME/.local/bin:"
+        # sudo ls -lah $HOME/.local/bin
         echo "Robot:"
         which robot
     
