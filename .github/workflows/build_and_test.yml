@@ -68,16 +68,30 @@ jobs:
         sleep 10  # Give the container some time to start
     - name: Check container status
       run: docker inspect bngblaster-container
-    - name: Setup Python 3.13
-      uses: actions/setup-python@v5.3.0
-      with:
-        python-version: "3.13"
+    # - name: Setup Python 3.13
+    #   uses: actions/setup-python@v5.3.0
+    #   with:
+    #     python-version: "3.13"
     - name: Run Robot Framework tests
       run: |
-        pip install git+https://github.com/robotframework/SeleniumLibrary.git
+        # pip install git+https://github.com/robotframework/SeleniumLibrary.git
         robot tests/
 
+    - name: Delete GHCR image if test fails
+      if: failure()  
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "Deleting GHCR image..."
+        IMAGE_NAME="ghcr.io/akatsukyy/bngblaster_web_client"
+        IMAGE_VERSION="latest"
+        echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
+        gh api --method DELETE \
+          -H "Accept: application/vnd.github.v3+json" \
+          /orgs/akatsukyy/packages/container/${IMAGE_NAME}/versions/${IMAGE_VERSION}
+
     - name: Send email with test results
+      if: always()
       uses: dawidd6/action-send-mail@v3
       with:
         server_address: smtp.gmail.com
@@ -86,6 +100,8 @@ jobs:
         password: ${{ secrets.MAIL_PASSWORD }}
         subject: "Test Result for BNGBLASTER App"
         body: |
-          Robot Test Result Of BNGLASTER: ${{ steps.robot_test.outcome }}
-        to: ${{ secrets.MAIL_USERNAME }}
+          Robot Test Result: ${{ job.status }}  
+          $(if [ "${{ job.status }}" == "failure" ]; then echo "Test fail and pakages has been deleted."; else echo "Tests passed successfully."; fi)
+        to: ${{ secrets.MAIL_USERNAME }}  
         from: workflow of akatsukyy/bngblaster_web_client
+  
