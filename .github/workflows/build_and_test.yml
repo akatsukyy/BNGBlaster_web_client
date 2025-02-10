@@ -71,7 +71,6 @@ jobs:
     - name: Run Robot Framework tests
       run: |
         robot tests/
-     
     - name: Send email with test results
       uses: dawidd6/action-send-mail@v3
       with:
