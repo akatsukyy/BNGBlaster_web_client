@@ -56,7 +56,9 @@ jobs:
         echo "Checking /usr/local/bin:"
         ls -lah /usr/local/bin
         echo "Checking $HOME/.local/bin:"
-        ls -lah $HOME/.local/bin
+        sudo ls -lah $HOME/.local/bin
+        echo "Robot:"
+        which robot
     
     # - name: Checkout code
     #   uses: actions/checkout@v3
