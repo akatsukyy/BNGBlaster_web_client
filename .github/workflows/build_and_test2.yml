@@ -1,4 +1,4 @@
-name: Build and Test BNGBLASTER App
+name: Build and Test BNGBLASTER App V2
 
 on:
   push:
@@ -140,7 +140,7 @@ jobs:
 
     - name: Run bngblaster app
       run: |
-        docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:latest
+        docker run -d --name bngblaster-container -p 8505:8505 my-bngblaster-app:latest
         sleep 10  # Give the container some time to start
 
     - name: Check container status
