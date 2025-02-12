@@ -94,7 +94,7 @@ jobs:
       run: |
         echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
         pip3 --version
-        python --version
+        python3 --version
         google-chrome --version
         firefox --version
         geckodriver --version
