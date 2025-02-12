@@ -1,12 +1,12 @@
 name: Build and Test BNGBLASTER App
 
-on: fork
-  # push:
-  #   branches:
-  #     - main
-  # pull_request:
-  #   branches:
-  #     - main
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build_and_push_image:
@@ -25,52 +25,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-buildx-
 
-    - name: Scan Dockerfile 
-      uses: aquasecurity/trivy-action@0.28.0
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        severity: 'CRITICAL,HIGH,MEDIUM'
-        cache: true
-        
-    - name: Send email with test results
-      if: failure()
-      uses: dawidd6/action-send-mail@v3
-      with:
-        server_address: smtp.gmail.com
-        server_port: 465
-        username: ${{ secrets.MAIL_USERNAME }}
-        password: ${{ secrets.MAIL_PASSWORD }}
-        subject: "Test Result for BNGBLASTER App"
-        body: |
-          Dockerfile has Vulnerability 
-        to: ${{ secrets.MAIL_USERNAME }}  
-        from: workflow of akatsukyy/bngblaster_web_client
-
     - name: Build Docker image
       run: docker build -t my-bngblaster-app .
-
-    - name: Scan Dockerfile 
-      uses: aquasecurity/trivy-action@0.28.0
-      with:
-        scan-type: 'image'
-        scan-ref: 'my-bngblaster-app:latest'
-        severity: 'CRITICAL,HIGH,MEDIUM'
-        cache: true
-
-    - name: Send email with test results
-      if: failure()
-      uses: dawidd6/action-send-mail@v3
-      with:
-        server_address: smtp.gmail.com
-        server_port: 465
-        username: ${{ secrets.MAIL_USERNAME }}
-        password: ${{ secrets.MAIL_PASSWORD }}
-        subject: "Test Result for BNGBLASTER App"
-        body: |
-          Image has Vulnerability
-        to: ${{ secrets.MAIL_USERNAME }}  
-        from: workflow of akatsukyy/bngblaster_web_client
     
     - name: Downcase REPO
       run: |
@@ -128,14 +84,8 @@ jobs:
 
     - name: Check container status
       run: docker inspect bngblaster-container
-    - name: Setup Python 3.13
-      uses: actions/setup-python@v5.3.0
-      with:
-        python-version: "3.13"
     - name: Run Robot Framework tests
-      run: |
-        pip install git+https://github.com/robotframework/SeleniumLibrary.git
-        robot tests/
+      run: robot tests/
               
     - name: Delete GHCR image if test fails
       if: failure()
@@ -147,17 +97,17 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         package-version-ids: ${{ env.LATEST_VERSION_ID }}
         
-    # - name: Send email with test results
-    #   if: always()
-    #   uses: dawidd6/action-send-mail@v3
-    #   with:
-    #     server_address: smtp.gmail.com
-    #     server_port: 465
-    #     username: ${{ secrets.MAIL_USERNAME }}
-    #     password: ${{ secrets.MAIL_PASSWORD }}
-    #     subject: "Test Result for BNGBLASTER App"
-    #     body: |
-    #       Robot Test Result: ${{ job.status }}  
-    #     to: ${{ secrets.MAIL_USERNAME }}  
-    #     from: workflow of akatsukyy/bngblaster_web_client
+    - name: Send email with test results
+      if: always()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        username: ${{ secrets.MAIL_USERNAME }}
+        password: ${{ secrets.MAIL_PASSWORD }}
+        subject: "Test Result for BNGBLASTER App"
+        body: |
+          Robot Test Result: ${{ job.status }}  
+        to: ${{ secrets.MAIL_USERNAME }}  
+        from: workflow of akatsukyy/bngblaster_web_client
   
