@@ -42,9 +42,7 @@ jobs:
     - name: Push image to GitHub Container Registry
       run: |
         docker tag my-bngblaster-app:latest ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
-        docker tag my-bngblaster-app:latest ghcr.io/${{ env.REPO }}:latest
         docker push ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
-        docker push ghcr.io/${{ env.REPO }}:latest
 
   test_image_and_commit_chart:
     runs-on: robot-dind
@@ -67,7 +65,7 @@ jobs:
         echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
     - name: Pull Docker image
-      run: docker pull ghcr.io/${{ env.REPO }}:latest
+      run: docker pull ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
 
     - name: Get latest image version ID by curl
       run: |
@@ -79,7 +77,7 @@ jobs:
 
     - name: Run bngblaster app
       run: |
-        docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:latest
+        docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
         sleep 10  # Give the container some time to start
 
     - name: Check container status
