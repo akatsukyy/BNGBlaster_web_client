@@ -82,6 +82,7 @@ jobs:
 
     - name: Check container status
       run: docker inspect bngblaster-container
+      
     - name: Run Robot Framework tests
       run: robot tests/
               
