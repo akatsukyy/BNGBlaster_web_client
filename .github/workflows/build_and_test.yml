@@ -100,6 +100,8 @@ jobs:
         geckodriver --version
         chromedriver --version
         pip list
+        robot --version
+
         
     # - name: Pull Docker image
     #   # run: docker pull ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
