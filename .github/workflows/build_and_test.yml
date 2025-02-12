@@ -106,6 +106,7 @@ jobs:
         subject: "Test Result for BNGBLASTER App"
         body: |
           Robot Test Result: ${{ job.status }}  
+          Commiter: ${{ github.actor }}
         to: ${{ secrets.MAIL_USERNAME }}  
         from: workflow of akatsukyy/bngblaster_web_client
   
