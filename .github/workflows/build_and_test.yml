@@ -100,7 +100,7 @@ jobs:
         geckodriver --version
         chromedriver --version
         pip list
-        robot --version
+        python3 -m robot --version
 
         
     # - name: Pull Docker image
