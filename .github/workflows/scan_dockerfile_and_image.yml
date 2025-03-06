@@ -11,7 +11,7 @@ on:
 
 jobs:
   scan:
-    runs-on: ubuntu-dind
+    runs-on: robot-dind
     permissions:
       contents: read
       packages: write
@@ -19,7 +19,7 @@ jobs:
 
     - name: Checkout code
       uses: actions/checkout@v3
-      
+
     - name: Scan Dockerfile 
       id: scan_dockerfile
       uses: aquasecurity/trivy-action@0.28.0
