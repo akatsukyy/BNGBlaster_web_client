@@ -3,14 +3,14 @@ name: Build,test BNGBLASTER App and update chart, helm_chart version
 on:
   push:
     branches:
-      - test
+      - main
   pull_request:
     branches:
-      - test
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-dind
+    runs-on: robot-dind
     permissions:
       contents: read
       packages: write
@@ -30,34 +30,8 @@ jobs:
       run: |
         echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
-    # - name: Scan Dockerfile 
-    #   id: scan_dockerfile
-    #   uses: aquasecurity/trivy-action@0.28.0
-    #   with:
-    #     scan-type: 'config'
-    #     scan-ref: '.'
-    #     severity: 'CRITICAL,HIGH'
-    #     cache: true
-    #     exit-code: 1
-    #     format: 'table'
-
     - name: Build Docker image
-      run: docker build --cache-from ghcr.io/${{ env.REPO }}:latest -t my-bngblaster-app:latest .
-      
-    # - name: Scan Docker image
-    #   id: scan_image
-    #   uses: aquasecurity/trivy-action@0.28.0
-    #   with:
-    #     scan-type: 'image'
-    #     scan-ref: 'my-bngblaster-app:latest'
-    #     severity: 'CRITICAL,HIGH'
-    #     cache: true
-    #     exit-code: 1
-    #     format: 'table'
-    
-    - name: Vulnerabilities are found
-      if: failure()
-      run: echo "Build failed due to security vulnerabilities. Please update Dockerfile and retry."
+      run: docker build ghcr.io/${{ env.REPO }}:latest -t my-bngblaster-app:latest .
 
     - name: Push image to GitHub Container Registry
       run: |
@@ -129,100 +103,100 @@ jobs:
         docker tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} ghcr.io/${{ env.REPO }}:latest
         docker push ghcr.io/${{ env.REPO }}:latest
    
-  update: 
-    needs: test
-    runs-on: ubuntu-dind
-    steps:
-    - name: Install Helm
-      uses: azure/setup-helm@v3
-      with:
-        version: 'latest'
+  # update: 
+  #   needs: test
+  #   runs-on: ubuntu-dind
+  #   steps:
+  #   - name: Install Helm
+  #     uses: azure/setup-helm@v3
+  #     with:
+  #       version: 'latest'
 
-    - name: Setup Python
-      uses: actions/setup-python@v5.3.0
-      with:
-        python-version: "3.13"
+  #   - name: Setup Python
+  #     uses: actions/setup-python@v5.3.0
+  #     with:
+  #       python-version: "3.13"
     
-    - name: Clone charts Repository
-      uses: actions/checkout@v4
-      with:
-        repository: '${{ github.repository_owner }}/charts'
-        ref: 'main'
-        token: ${{ secrets.PUSH_TOKEN }}
-        path: charts
+  #   - name: Clone charts Repository
+  #     uses: actions/checkout@v4
+  #     with:
+  #       repository: '${{ github.repository_owner }}/charts'
+  #       ref: 'main'
+  #       token: ${{ secrets.PUSH_TOKEN }}
+  #       path: charts
 
-    - name: Clone stack_charts Repository
-      uses: actions/checkout@v4
-      with:
-        repository: '${{ github.repository_owner }}/stacked_charts'
-        ref: 'master'
-        token: '${{ secrets.PUSH_TOKEN }}'
-        path: stacked_charts
+  #   - name: Clone stack_charts Repository
+  #     uses: actions/checkout@v4
+  #     with:
+  #       repository: '${{ github.repository_owner }}/stacked_charts'
+  #       ref: 'master'
+  #       token: '${{ secrets.PUSH_TOKEN }}'
+  #       path: stacked_charts
 
-    - name: Clone SVTECH_CI_utilities Repository
-      uses: actions/checkout@v4
-      with:
-        repository: '${{ github.repository_owner }}/SVTECH_CI_utilities'
-        ref: 'dev-jenkins'
-        token: '${{ secrets.PUSH_TOKEN }}'
-        path: SVTECH_CI_utilities
+  #   - name: Clone SVTECH_CI_utilities Repository
+  #     uses: actions/checkout@v4
+  #     with:
+  #       repository: '${{ github.repository_owner }}/SVTECH_CI_utilities'
+  #       ref: 'dev-jenkins'
+  #       token: '${{ secrets.PUSH_TOKEN }}'
+  #       path: SVTECH_CI_utilities
 
-    - name: Import GPG key
-      uses: crazy-max/ghaction-import-gpg@v6.2.0
-      with:
-        gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-        # git_user_signingkey: true
-        # git_commit_gpgsign: true
+  #   - name: Import GPG key
+  #     uses: crazy-max/ghaction-import-gpg@v6.2.0
+  #     with:
+  #       gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+  #       # git_user_signingkey: true
+  #       # git_commit_gpgsign: true
     
-    - name: Modify image version in charts
-      run: |
-        sed -i '/^  repository: svtechnmaa\/bngblaster_web_client/{N;s/  tag: .*/  tag: '"v1.${{ github.run_number}}"'/}' charts/kubernetes/bngblaster/values.yaml
+  #   - name: Modify image version in charts
+  #     run: |
+  #       sed -i '/^  repository: svtechnmaa\/bngblaster_web_client/{N;s/  tag: .*/  tag: '"v1.${{ github.run_number}}"'/}' charts/kubernetes/bngblaster/values.yaml
     
-    - name: Modify image version in stack_charts
-      run: |
-        pip install requests pyyaml
-        python3 SVTECH_CI_utilities/auto_testing/python_script/public_helmchart_release.py --BUILD_VARS_PATH='.' --ID='.' --GITHUB_TOKEN=${{secrets.PUSH_TOKEN}} --OWNER=${{ github.repository_owner}} --charts_string=bngblaster --REPO=charts
+  #   - name: Modify image version in stack_charts
+  #     run: |
+  #       pip install requests pyyaml
+  #       python3 SVTECH_CI_utilities/auto_testing/python_script/public_helmchart_release.py --BUILD_VARS_PATH='.' --ID='.' --GITHUB_TOKEN=${{secrets.PUSH_TOKEN}} --OWNER=${{ github.repository_owner}} --charts_string=bngblaster --REPO=charts
 
-    - name: Update image version in charts
-      env:
-        GIT_USER_NAME: "svtechnmaa"
-        GIT_USER_EMAIL: "nmaa@svtech.com.vn"
-      run: |
-        cd charts
-        helm repo index artifacthub
+  #   - name: Update image version in charts
+  #     env:
+  #       GIT_USER_NAME: "svtechnmaa"
+  #       GIT_USER_EMAIL: "nmaa@svtech.com.vn"
+  #     run: |
+  #       cd charts
+  #       helm repo index artifacthub
 
-        if [[ `git diff --name-only` ]]; then  
-          git config user.name "${{ env.GIT_USER_NAME }}"
-          git config user.email "${{ env.GIT_USER_EMAIL }}"
-          git config commit.gpgSign true
-          git config user.signingkey ${{ secrets.GPG_KEY_ID }}
+  #       if [[ `git diff --name-only` ]]; then  
+  #         git config user.name "${{ env.GIT_USER_NAME }}"
+  #         git config user.email "${{ env.GIT_USER_EMAIL }}"
+  #         git config commit.gpgSign true
+  #         git config user.signingkey ${{ secrets.GPG_KEY_ID }}
 
-          git add .
-          git commit --no-verify -m "no-ci: Update BNGBlaster image version to v1.${{ github.run_number}}"
-          # git remote set-url origin https://svtechnmaa:${{secrets.PUSH_TOKEN}}@github.com/svtechnmaa/charts.git
-          git push origin main
-        else 
-          echo "No changes to commit" 
-        fi
+  #         git add .
+  #         git commit --no-verify -m "no-ci: Update BNGBlaster image version to v1.${{ github.run_number}}"
+  #         # git remote set-url origin https://svtechnmaa:${{secrets.PUSH_TOKEN}}@github.com/svtechnmaa/charts.git
+  #         git push origin main
+  #       else 
+  #         echo "No changes to commit" 
+  #       fi
     
-    - name: Update image version in stack_charts
-      env:
-        GIT_USER_NAME: "svtechnmaa"
-        GIT_USER_EMAIL: "nmaa@svtech.com.vn"
+  #   - name: Update image version in stack_charts
+  #     env:
+  #       GIT_USER_NAME: "svtechnmaa"
+  #       GIT_USER_EMAIL: "nmaa@svtech.com.vn"
 
-      run: |
-        cd stacked_charts
-        if [[ `git diff --name-only` ]]; then 
+  #     run: |
+  #       cd stacked_charts
+  #       if [[ `git diff --name-only` ]]; then 
 
-          git config user.name "${{ env.GIT_USER_NAME }}"
-          git config user.email "${{ env.GIT_USER_EMAIL }}"
-          git config commit.gpgSign true
-          git config user.signingkey ${{ secrets.GPG_KEY_ID }}
+  #         git config user.name "${{ env.GIT_USER_NAME }}"
+  #         git config user.email "${{ env.GIT_USER_EMAIL }}"
+  #         git config commit.gpgSign true
+  #         git config user.signingkey ${{ secrets.GPG_KEY_ID }}
 
-          git add .
-          git commit -S -m "no-ci: Update BNGBlaster image version to v1.${{ github.run_number}}" 
-          # git remote set-url origin https://svtechnmaa:${{secrets.PUSH_TOKEN}}@github.com/svtechnmaa/stacked_charts.git
-          git push origin master  
-        else 
-          echo "No changes to commit" 
-        fi
+  #         git add .
+  #         git commit -S -m "no-ci: Update BNGBlaster image version to v1.${{ github.run_number}}" 
+  #         # git remote set-url origin https://svtechnmaa:${{secrets.PUSH_TOKEN}}@github.com/svtechnmaa/stacked_charts.git
+  #         git push origin master  
+  #       else 
+  #         echo "No changes to commit" 
+  #       fi
