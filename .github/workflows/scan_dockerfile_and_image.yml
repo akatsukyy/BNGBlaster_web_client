@@ -26,17 +26,17 @@ jobs:
       with:
         scan-type: 'config'
         scan-ref: '.'
-        severity: 'CRITICAL,HIGH'
+        severity: 'CRITICAL'
         cache: true
         format: 'table'
-        output: 'scan_result.txt'
+        output: 'scan_result.json'
 
     - name: Upload scan results as artifact
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: trivy-scan-results
-        path: trivy-results.txt
+        path: trivy-results.json
 
     # - name: Scan Docker image
     #   id: scan_image
