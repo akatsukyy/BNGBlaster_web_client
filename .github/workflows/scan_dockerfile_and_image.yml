@@ -26,10 +26,13 @@ jobs:
       with:
         scan-type: 'config'
         scan-ref: '.'
-        severity: 'CRITICAL'
+        severity: 'CRITICAL,HIGH'
         cache: true
         format: 'table'
         output: 'scan_result.json'
+
+    - name: Show Trivy scan results in logs
+      run: cat scan_result.json
 
     - name: Upload scan results as artifact
       if: always()
