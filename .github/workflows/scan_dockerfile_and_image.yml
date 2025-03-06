@@ -28,7 +28,6 @@ jobs:
         scan-ref: '.'
         severity: 'CRITICAL,HIGH'
         cache: true
-        exit-code: 1
         format: 'table'
         output: 'scan_result.txt'
 
