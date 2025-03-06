@@ -1,0 +1,49 @@
+
+name: Scan Dockerfile and Image
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main 
+
+jobs:
+  scan:
+    runs-on: ubuntu-dind
+    permissions:
+      contents: read
+      packages: write
+    steps:
+
+    - name: Scan Dockerfile 
+      id: scan_dockerfile
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        scan-type: 'config'
+        scan-ref: '.'
+        severity: 'CRITICAL,HIGH'
+        cache: true
+        exit-code: 1
+        format: 'table'
+        output: 'scan_result.txt'
+
+    - name: Upload scan results as artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: trivy-scan-results
+        path: trivy-results.txt
+
+    # - name: Scan Docker image
+    #   id: scan_image
+    #   uses: aquasecurity/trivy-action@0.28.0
+    #   with:
+    #     scan-type: 'image'
+    #     scan-ref: 'my-bngblaster-app:latest'
+    #     severity: 'CRITICAL,HIGH'
+    #     cache: true
+    #     exit-code: 1
+    #     format: 'table'
+
