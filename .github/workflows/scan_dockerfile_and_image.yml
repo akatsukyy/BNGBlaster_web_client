@@ -17,6 +17,9 @@ jobs:
       packages: write
     steps:
 
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
     - name: Scan Dockerfile 
       id: scan_dockerfile
       uses: aquasecurity/trivy-action@0.28.0
