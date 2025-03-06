@@ -36,7 +36,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: trivy-scan-results
-        path: trivy-results.json
+        path: scan_result.json
 
     # - name: Scan Docker image
     #   id: scan_image
