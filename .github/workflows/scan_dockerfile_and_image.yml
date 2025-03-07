@@ -4,10 +4,10 @@ name: Scan Dockerfile and Image
 on:
   push:
     branches:
-      - test
+      - main
   pull_request:
     branches:
-      - test
+      - main
 
 jobs:
   scan:
@@ -20,16 +20,25 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # - name: Scan Dockerfile 
-    #   id: scan_dockerfile
-    #   uses: aquasecurity/trivy-action@0.28.0
-    #   with:
-    #     scan-type: 'config'
-    #     scan-ref: '.'
-    #     severity: 'CRITICAL,HIGH'
-    #     cache: true
-    #     format: 'table'
-    #     output: 'dockerfile_scan_result.json'
+    - name: Restore Trivy Cache
+      uses: actions/cache@v3
+      with:
+        path: .trivy
+        key: trivy-cache-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}  
+        restore-keys: |
+          trivy-cache-${{ runner.os }}-
+
+    - name: Scan Dockerfile 
+      id: scan_dockerfile
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        scan-type: 'config'
+        scan-ref: '.'
+        severity: 'CRITICAL,HIGH'
+        cache: true
+        format: 'table'
+        cache-dir: .trivy
+        output: 'dockerfile_scan_result.json'
        
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
@@ -61,16 +70,8 @@ jobs:
         severity: 'CRITICAL,HIGH'
         cache: true
         format: 'table'
-
-    - name: Show Image scan results in logs
-      run: cat image_scan_result.json
-
-    - name: Upload Image scan results as artifact
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: Image scan result
-        path: image_scan_result.json
+        cache-dir: .trivy
+        output: 'image_scan_result.json'
 
     - name: Show Dockerfile scan results in logs
       run: cat dockerfile_scan_result.json
@@ -81,3 +82,13 @@ jobs:
       with:
         name: Dockerfile scan result
         path: dockerfile_scan_result.json
+
+    - name: Show Image scan results in logs
+      run: cat image_scan_result.json
+
+    - name: Upload Image scan results as artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Image scan result
+        path: image_scan_result.json
