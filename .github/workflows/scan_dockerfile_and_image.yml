@@ -58,7 +58,7 @@ jobs:
       uses: aquasecurity/trivy-action@0.28.0
       with:
         scan-type: 'image'
-        scan-ref: 'my-bngblaster-app:latest'
+        scan-ref: 'ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}'
         severity: 'CRITICAL,HIGH'
         cache: true
         format: 'table'
