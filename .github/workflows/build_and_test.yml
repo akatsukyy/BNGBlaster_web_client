@@ -63,11 +63,11 @@ jobs:
         echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
     - name: Pull Docker image
-      run: docker pull ghcr.io/${{ env.REPO }}:cache
+      run: docker pull ghcr.io/${{ env.REPO }}:v1.13
 
     - name: Run bngblaster app
       run: |
-        docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:cache
+        docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:v1.13
         sleep 10  # Give the container some time to start
 
     - name: Check container status
