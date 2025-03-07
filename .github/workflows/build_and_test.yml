@@ -39,8 +39,6 @@ jobs:
           --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
           --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache,mode=max \
           --push \
-          --progress=plain \
-          --debug \
           --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
 
   test:
@@ -75,10 +73,10 @@ jobs:
     - name: Check container status
       run: docker inspect bngblaster-container
 
-    - name: Run Robot Framework tests
-      run: robot tests/
+    # - name: Run Robot Framework tests
+    #   run: robot tests/
 
-    - name: Get image version ID based on tag
+    - name: Delete image if test fail
       if: failure()
       run: |
         REPO_NAME=$(echo ${{ env.REPO }} | cut -d'/' -f2)

@@ -45,11 +45,10 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       
-    - name: Build and push image to ghcr.io
+    - name: Build image
       run: |
         docker buildx build \
           --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
-          --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache,mode=max \
           --load \
           --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
 
