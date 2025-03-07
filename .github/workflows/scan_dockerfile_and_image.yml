@@ -4,10 +4,10 @@ name: Scan Dockerfile and Image
 on:
   push:
     branches:
-      - main
+      - test
   pull_request:
     branches:
-      - main 
+      - test
 
 jobs:
   scan:
@@ -50,7 +50,7 @@ jobs:
         docker buildx build \
           --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
           --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache,mode=max \
-          --push \
+          --load \
           --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
 
     - name: Scan Docker image

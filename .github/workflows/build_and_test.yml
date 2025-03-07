@@ -3,10 +3,10 @@ name: Build,test BNGBLASTER App and update chart, helm_chart version
 on:
   push:
     branches:
-      - test
+      - main
   pull_request:
     branches:
-      - test
+      - main
 
 jobs:
   build:
@@ -30,21 +30,13 @@ jobs:
       run: |
         echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
-    # - name: Build Docker image
-    #   run: docker build -t my-bngblaster-app:latest .
-
-    # - name: Push image to GitHub Container Registry
-    #   run: |
-    #     docker tag my-bngblaster-app:latest ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
-    #     docker push ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
-
     - name: Build and push image to ghcr.io
       run: |
         docker buildx build \
           --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
           --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache,mode=max
           --push \
-          --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
+          --tag ghcr.io/${{ env.REPO }}:cache . 
           
   test:
     runs-on: robot-dind
@@ -68,11 +60,11 @@ jobs:
         echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
     - name: Pull Docker image
-      run: docker pull ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
+      run: docker pull ghcr.io/${{ env.REPO }}:cache
 
     - name: Run bngblaster app
       run: |
-        docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
+        docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:cache
         sleep 10  # Give the container some time to start
 
     - name: Check container status
@@ -80,24 +72,6 @@ jobs:
 
     - name: Run Robot Framework tests
       run: robot tests/
-
-    - name: Get image version ID 
-      run: |
-        VERSION_ID=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-        -H "Accept: application/vnd.github.v3+json" \
-        https://api.github.com/orgs/svtechnmaa/packages/container/bngblaster_web_client/versions \
-        | jq '.[0].id')
-        echo "VERSION_ID=$VERSION_ID" >> $GITHUB_ENV
-
-    - name: Delete GHCR image if test fails
-      if: failure()
-      uses: actions/delete-package-versions@v5
-      with:
-        package-name: ${{ env.REPO }}
-        package-type: "container"
-        owner: ${{ github.repository_owner }}
-        token: ${{ secrets.GITHUB_TOKEN }}
-        package-version-ids: ${{ env.VERSION_ID }}
 
     - name: 'Upload robot test result'
       if: always()
@@ -108,7 +82,9 @@ jobs:
 
     - name: Tag latest image and push to GitHub Container Registry
       run: |
-        docker tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} ghcr.io/${{ env.REPO }}:latest
+        docker tag ghcr.io/${{ env.REPO }}:cache ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
+        docker tag ghcr.io/${{ env.REPO }}:cache ghcr.io/${{ env.REPO }}:latest
+        docker push ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
         docker push ghcr.io/${{ env.REPO }}:latest
    
   # update: 
