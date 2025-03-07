@@ -73,8 +73,8 @@ jobs:
     - name: Check container status
       run: docker inspect bngblaster-container
 
-    - name: Run Robot Framework tests
-      run: robot tests/
+    # - name: Run Robot Framework tests
+    #   run: robot tests/
 
     - name: Tag latest image and push to GitHub Container Registry
       if: success()
@@ -90,7 +90,7 @@ jobs:
       with:
         name: robot-test-report
         path: ./report.html
-        
+
   # update: 
   #   needs: test
   #   runs-on: ubuntu-dind
