@@ -20,6 +20,7 @@ on:
 
 jobs:
   build:
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || github.event.inputs.job_name == 'build' }}
     runs-on: robot-dind
     permissions:
       contents: read
@@ -52,6 +53,7 @@ jobs:
           --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
 
   test:
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || github.event.inputs.job_name == 'test' }}
     runs-on: robot-dind
     needs: build
     permissions:
@@ -135,6 +137,7 @@ jobs:
         path: ./report.html
 
   # update: 
+  #   if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || github.event.inputs.job_name == 'update' }}
   #   needs: test
   #   runs-on: ubuntu-dind
   #   steps:
