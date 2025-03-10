@@ -32,4 +32,5 @@ RUN pip install -r /tmp/requirements.txt --no-cache-dir
 EXPOSE 8505
 ENTRYPOINT [ "/root/entrypoint.sh" ]
 
+
 CMD ["/bin/bash"]
