@@ -41,8 +41,8 @@ jobs:
         output: 'dockerfile_scanning_result.json'
        
     - name: List file in ~/.cache/trivy
-      run: ls -lh ~/.cache/trivy
-      
+      run: ls -lh ~/.cache
+
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
       with:
