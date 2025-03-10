@@ -23,7 +23,7 @@ jobs:
     - name: Restore Trivy Cache
       uses: actions/cache@v4
       with:
-        path: ~/.cache/trivy
+        path: ${{ github.workspace }}/.cache/trivy
         key: trivy-cache-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}  
         restore-keys: |
           trivy-cache-${{ runner.os }}-
@@ -40,8 +40,10 @@ jobs:
         # cache-dir: .trivy
         output: 'dockerfile_scanning_result.json'
        
-    - name: List file in ~/.cache/trivy
-      run: ls -lh ~/.cache
+    - name: List file in BNGBlaster_web_client/BNGBlaster_web_client/.cache/trivy
+      run: |
+        echo ${{ github.workspace }}
+        ls ${{ github.workspace }}/.cache/trivy
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
