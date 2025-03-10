@@ -21,12 +21,15 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Restore Trivy Cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
-        path: .trivy
+        path: ~/.cache/trivy
         key: trivy-cache-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}  
         restore-keys: |
           trivy-cache-${{ runner.os }}-
+
+    - name: List file in ~/.cache/trivy
+      run: ls -lh ~/.cache/trivy
 
     - name: Scan Dockerfile 
       id: scan_dockerfile
@@ -37,7 +40,7 @@ jobs:
         severity: 'CRITICAL,HIGH'
         cache: true
         format: 'table'
-        cache-dir: .trivy
+        # cache-dir: .trivy
         output: 'dockerfile_scanning_result.json'
        
     - name: Login to GitHub Container Registry
@@ -70,7 +73,7 @@ jobs:
         severity: 'CRITICAL,HIGH'
         cache: true
         format: 'table'
-        cache-dir: .trivy
+        # cache-dir: .trivy
         output: 'image_scanning_result.json'
 
     - name: Show Dockerfile scan results in logs
