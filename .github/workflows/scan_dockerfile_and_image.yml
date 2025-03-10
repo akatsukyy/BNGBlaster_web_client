@@ -8,7 +8,6 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   scan:
@@ -25,9 +24,9 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.workspace }}/.cache/trivy
-        key: trivy-cache-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}  
+        key: trivy-cache-${{ runner.os }}-$(date +%Y-%W)
         restore-keys: |
-          trivy-cache-${{ runner.os }}-
+          trivy-cache-${{ runner.os }}
 
     - name: Scan Dockerfile 
       id: scan_dockerfile

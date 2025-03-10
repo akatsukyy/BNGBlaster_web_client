@@ -3,10 +3,20 @@ name: Build,test BNGBLASTER App and update chart, helm_chart version
 on:
   push:
     branches:
-      - test
+      - main
   pull_request:
     branches:
-      - test
+      - main
+  workflow_dispatch:
+    inputs:
+      job_name:
+        description: 'Choose only job to re-run'
+        required: true
+        type: choice
+        options:
+          - build
+          - test
+          - update
 
 jobs:
   build:
