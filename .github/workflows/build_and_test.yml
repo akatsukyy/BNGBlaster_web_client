@@ -17,6 +17,11 @@ on:
           - build
           - test
           - update
+      run_number:
+        description: 'Choose only job to re-run'
+        required: true
+        type: number
+
 
 jobs:
   build:
