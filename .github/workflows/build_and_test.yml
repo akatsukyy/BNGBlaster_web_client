@@ -3,10 +3,10 @@ name: Build,test BNGBLASTER App and update chart, helm_chart version
 on:
   push:
     branches:
-      - test
+      - main
   pull_request:
     branches:
-      - test
+      - main
 
 jobs:
   build:
@@ -68,10 +68,18 @@ jobs:
     - name: Run bngblaster app
       run: |
         docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
-        sleep 10  # Give the container some time to start
 
-    - name: Check container status
-      run: docker inspect bngblaster-container
+    - name: Wait and check container status
+      run: |
+        sleep 10
+        STATUS=$(docker inspect --format='{{.State.Status}}' bngblaster-container)
+        echo "Container status: $STATUS"
+        if [ "$STATUS" = "running" ]; then
+          echo "Container is running!"
+        else
+          echo "Container is not running: $STATUS"
+          exit 1
+        fi
 
     # - name: Run Robot Framework tests
     #   run: robot tests/

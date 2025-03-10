@@ -38,7 +38,7 @@ jobs:
         cache: true
         format: 'table'
         cache-dir: .trivy
-        output: 'dockerfile_scan_result.json'
+        output: 'dockerfile_scanning_result.json'
        
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
@@ -71,26 +71,30 @@ jobs:
         cache: true
         format: 'table'
         cache-dir: .trivy
-        output: 'image_scan_result.json'
+        output: 'image_scanning_result.json'
 
     - name: Show Dockerfile scan results in logs
-      run: cat dockerfile_scan_result.json
+      run: |
+        echo "##[command] Show Dockerfile scanning result"
+        cat dockerfile_scanning_result.json
 
     - name: Upload Dockerfile scan results as artifact
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: Dockerfile scan result
-        path: dockerfile_scan_result.json
+        name: Dockerfile scanning result
+        path: dockerfile_scanning_result.json
 
-    - name: Show Image scan results in logs
-      run: cat image_scan_result.json
+    - name: Show Image scanning results in logs
+      run: |
+        echo "##[command] Show Image scanning result"
+        cat image_scanning_result.json
 
-    - name: Upload Image scan results as artifact
+    - name: Upload Image scanning results as artifact
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: Image scan result
-        path: image_scan_result.json
+        name: Image scanning result
+        path: image_scanning_result.json
 
         
