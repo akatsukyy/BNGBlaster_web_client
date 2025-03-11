@@ -17,21 +17,24 @@ on:
           - build
           - test
           - update
-      run_number:
-        description: 'Choose only job to re-run'
-        required: true
+      privious_run_number:
+        description: 'Enter previous run number (leave empty for new run)'
+        required: false
         type: number
-
+        
+env:
+  RUN_NUMBER: ${{ inputs.privious_run_number || github.run_number }}
 
 jobs:
   build:
-    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || github.event.inputs.job_name == 'build' }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_name == 'build') }}
+
     runs-on: robot-dind
     permissions:
       contents: read
       packages: write
     steps:
-      
+
     - name: Checkout code
       uses: actions/checkout@v3
 
@@ -58,7 +61,7 @@ jobs:
           --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
 
   test:
-    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || github.event.inputs.job_name == 'test' }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_name == 'test') }}
     runs-on: robot-dind
     needs: build
     permissions:
@@ -142,7 +145,7 @@ jobs:
         path: ./report.html
 
   # update: 
-  #   if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || github.event.inputs.job_name == 'update' }}
+  #   if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_name == 'update') }}
   #   needs: test
   #   runs-on: ubuntu-dind
   #   steps:
