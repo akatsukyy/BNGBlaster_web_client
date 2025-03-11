@@ -28,13 +28,12 @@ env:
 jobs:
   build:
     if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_name == 'build') }}
-
     runs-on: robot-dind
     permissions:
       contents: read
       packages: write
     steps:
-      
+
     - name: Checkout code
       uses: actions/checkout@v3
 
@@ -58,7 +57,7 @@ jobs:
           --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
           --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache,mode=max \
           --push \
-          --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
+          --tag ghcr.io/${{ env.REPO }}:v1.${{ github.RUN_NUMBER }} . 
 
   test:
     if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_name == 'test') }}
@@ -83,11 +82,11 @@ jobs:
         echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
     - name: Pull Docker image
-      run: docker pull ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
+      run: docker pull ghcr.io/${{ env.REPO }}:v1.${{ github.RUN_NUMBER }}
 
     - name: Run bngblaster app
       run: |
-        docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
+        docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:v1.${{ github.RUN_NUMBER }}
 
     - name: Wait and check container status
       run: |
@@ -112,7 +111,7 @@ jobs:
 
         VERSION_ID=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
         "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$REPO_NAME/versions" \
-        | jq -r '.[] | select(.metadata.container.tags[] == "v1.${{ github.run_number }}") | .id')
+        | jq -r '.[] | select(.metadata.container.tags[] == "v1.${{ github.RUN_NUMBER }}") | .id')
 
         echo "VERSION_ID=$VERSION_ID" >> $GITHUB_ENV
         echo "Package version ID: $VERSION_ID"
@@ -145,7 +144,7 @@ jobs:
         path: ./report.html
 
   # update: 
-  #   if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_name == 'update') }}
+  #   if: alway() ${{ github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_name == 'update') }}
   #   needs: test
   #   runs-on: ubuntu-dind
   #   steps:
