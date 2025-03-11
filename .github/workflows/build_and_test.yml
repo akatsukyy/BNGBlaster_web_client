@@ -15,15 +15,15 @@ jobs:
       contents: read
       packages: write
     steps:
-    # - name: Checkout code
-    #   uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    # - name: Login to GitHub Container Registry
-    #   uses: docker/login-action@v2
-    #   with:
-    #     registry: ghcr.io
-    #     username: '${{ github.repository_owner }}'
-    #     password: '${{ secrets.GITHUB_TOKEN }}'
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: '${{ github.repository_owner }}'
+        password: '${{ secrets.GITHUB_TOKEN }}'
 
     - name: Downcase REPO
       run: |
@@ -33,90 +33,90 @@ jobs:
         echo ${{ github.repository_owner}}
         echo ${{ env.REPO}}
 
-  #   - name: Set up Docker Buildx
-  #     uses: docker/setup-buildx-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
       
-  #   - name: Build and push image to ghcr.io
-  #     run: |
-  #       docker buildx build \
-  #         --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
-  #         --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache,mode=max \
-  #         --push \
-  #         --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
+    - name: Build and push image to ghcr.io
+      run: |
+        docker buildx build \
+          --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
+          --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache,mode=max \
+          --push \
+          --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
 
-  # test:
-  #   runs-on: robot-dind
-  #   needs: build
-  #   permissions:
-  #     contents: read
-  #     packages: write
-  #   steps:
-    # - name: Checkout code
-    #   uses: actions/checkout@v3
+  test:
+    runs-on: robot-dind
+    needs: build
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    # - name: Login to GitHub Container Registry
-    #   uses: docker/login-action@v2
-    #   with:
-    #     registry: ghcr.io
-    #     username: '${{ github.repository_owner }}'
-    #     password: '${{ secrets.GITHUB_TOKEN }}'
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: '${{ github.repository_owner }}'
+        password: '${{ secrets.GITHUB_TOKEN }}'
 
-    # - name: Downcase REPO
-    #   run: |
-    #     echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+    - name: Downcase REPO
+      run: |
+        echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
-    # - name: Pull Docker image
-    #   run: docker pull ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
+    - name: Pull Docker image
+      run: docker pull ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
 
-    # - name: Run bngblaster app
-    #   run: |
-    #     docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
+    - name: Run bngblaster app
+      run: |
+        docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
 
-    # - name: Wait and check container status
-    #   run: |
-    #     sleep 10
-    #     STATUS=$(docker inspect --format='{{.State.Status}}' bngblaster-container)
-    #     echo "Container status: $STATUS"
-    #     if [ "$STATUS" = "running" ]; then
-    #       echo "Container is running!"
-    #     else
-    #       echo "Container is not running: $STATUS"
-    #       exit 1
-    #     fi
+    - name: Wait and check container status
+      run: |
+        sleep 10
+        STATUS=$(docker inspect --format='{{.State.Status}}' bngblaster-container)
+        echo "Container status: $STATUS"
+        if [ "$STATUS" = "running" ]; then
+          echo "Container is running!"
+        else
+          echo "Container is not running: $STATUS"
+          exit 1
+        fi
 
-    # - name: Run Robot Framework tests
-    #   run: robot tests/
+    - name: Run Robot Framework tests
+      run: robot tests/
 
-    # - name: Delete image if test fail
-    #   if: failure()
-    #   run: |
-    #     REPO_NAME=$(echo ${{ env.REPO }} | cut -d'/' -f2)
-    #     echo "Repo name: $REPO_NAME"
+    - name: Delete image if test fail
+      if: failure()
+      run: |
+        REPO_NAME=$(echo ${{ env.REPO }} | cut -d'/' -f2)
+        echo "Repo name: $REPO_NAME"
 
-    #     VERSION_ID=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-    #     "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$REPO_NAME/versions" \
-    #     | jq -r '.[] | select(.metadata.container.tags[] == "v1.${{ github.run_number }}") | .id')
+        VERSION_ID=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+        "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$REPO_NAME/versions" \
+        | jq -r '.[] | select(.metadata.container.tags[] == "v1.${{ github.run_number }}") | .id')
 
-    #     echo "VERSION_ID=$VERSION_ID" >> $GITHUB_ENV
-    #     echo "Package version ID: $VERSION_ID"
+        echo "VERSION_ID=$VERSION_ID" >> $GITHUB_ENV
+        echo "Package version ID: $VERSION_ID"
 
-    #     curl -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-    #     -H "Accept: application/vnd.github.v3+json" \
-    #     "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$REPO_NAME/versions/$VERSION_ID"
+        curl -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/users/${{ github.repository_owner }}/packages/container/$REPO_NAME/versions/$VERSION_ID"
 
 
-    # - name: Tag latest image and push to GitHub Container Registry
-    #   if: success()
-    #   run: |
-    #     docker tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} ghcr.io/${{ env.REPO }}:latest
-    #     docker push ghcr.io/${{ env.REPO }}:latest
+    - name: Tag latest image and push to GitHub Container Registry
+      if: success()
+      run: |
+        docker tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} ghcr.io/${{ env.REPO }}:latest
+        docker push ghcr.io/${{ env.REPO }}:latest
 
-    # - name: 'Upload robot test result'
-    #   if: always()
-    #   uses: actions/upload-artifact@v4.6.0
-    #   with:
-    #     name: robot-test-report
-    #     path: ./report.html
+    - name: 'Upload robot test result'
+      if: always()
+      uses: actions/upload-artifact@v4.6.0
+      with:
+        name: robot-test-report
+        path: ./report.html
 
   # update: 
   #   if: alway() ${{ github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_name == 'update') }}
