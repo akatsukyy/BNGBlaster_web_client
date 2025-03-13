@@ -3,10 +3,10 @@ name: Build,test BNGBLASTER App and update chart, helm_chart version
 on:
   push:
     branches:
-      - main
+      - test
   pull_request:
     branches:
-      - main  
+      - test  
 
 jobs:
   build:
@@ -40,6 +40,7 @@ jobs:
           --push \
           --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
 
+          
   test:
     runs-on: robot-dind
     needs: build
