@@ -71,7 +71,7 @@ jobs:
       run: |
         docker buildx build \
           --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
-          --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache
+          --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
           --push \
           --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
 
