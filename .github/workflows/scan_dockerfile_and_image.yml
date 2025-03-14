@@ -77,10 +77,10 @@ jobs:
         echo "##[command] Show results for Dockerfile scanning"
         cat dockerfile_scanning_result.json
 
-    - name: Show results for Image scanning
-      run: |
-        echo "##[command] Show results for Image scanning"
-        cat image_scanning_result.json
+    # - name: Show results for Image scanning
+    #   run: |
+    #     echo "##[command] Show results for Image scanning"
+    #     cat image_scanning_result.json
 
     - name: Upload Dockerfile scan results as artifact
       if: always()
