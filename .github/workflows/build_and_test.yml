@@ -24,25 +24,6 @@ jobs:
         registry: ghcr.io
         username: '${{ github.repository_owner }}'
         password: '${{ secrets.GITHUB_TOKEN }}'
-
-    - name: Cache Docker layers
-      uses: actions/cache@v4
-      id: cache
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
-
-    - name: Inspect cache content
-      if: steps.cache.outputs.cache-hit == 'true'
-      run: |
-        echo "Cache directory contents:"
-        ls -la /tmp/.buildx-cache
-        echo "Extracting cache for inspection:"
-        mkdir /tmp/cache-inspect
-        tar -xzf /tmp/.buildx-cache/* -C /tmp/cache-inspect || echo "No tar files found"
-        ls -la /tmp/cache-inspect
         
     - name: Downcase REPO
       run: |
@@ -54,7 +35,7 @@ jobs:
     - name: Build image
       run: |
         docker buildx build \
-          --cache-from=type=local,src=/tmp/.buildx-cache \
+          --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
           --load \
           --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} .
 
@@ -79,8 +60,8 @@ jobs:
     - name: Build and push image to ghcr.io
       run: |
         docker buildx build \
-          --cache-from=type=local,src=/tmp/.buildx-cache \
-          --cache-to=type=local,dest=/tmp/.buildx-cache \
+          --cache-from=type=registry,ref= ghcr.io/${{ env.REPO }}:cache \
+          --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
           --push \
           --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
 
