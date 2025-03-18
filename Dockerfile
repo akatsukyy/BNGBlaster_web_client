@@ -27,7 +27,7 @@ RUN ["chmod", "+x", "/root/entrypoint.sh"]
 COPY ./requirements.txt /tmp/requirements.txt
 
 RUN pip install -r /tmp/requirements.txt --no-cache-dir
-
+RUN pip list
 # RUN rm -rf /BNGBlaster_web_client
 EXPOSE 8505
 ENTRYPOINT [ "/root/entrypoint.sh" ]
