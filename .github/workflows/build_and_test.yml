@@ -131,6 +131,11 @@ jobs:
       run: |
         docker buildx imagetools create -t ghcr.io/${{ env.REPO }}:latest ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
         docker buildx imagetools inspect ghcr.io/akatsukyy/bngblaster_web_client:latest
+        docker buildx imagetools inspect ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
+        docker manifest inspect ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
+        oras discover ghcr.io/${{ env.REPO }} --plain-http
+
+
 
     - name: 'Upload robot test result'
       if: always()
