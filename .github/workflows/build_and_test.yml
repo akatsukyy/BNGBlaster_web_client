@@ -3,10 +3,10 @@ name: Build,test BNGBLASTER App and update chart, helm_chart version
 on:
   push:
     branches:
-      - main
+      - test
   pull_request:
     branches:
-      - main
+      - test
 
 jobs:
   build:
@@ -60,11 +60,10 @@ jobs:
     - name: Build and push image to ghcr.io
       run: |
         docker buildx build --platform linux/amd64 \
-          # --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
-          # --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache,mode=max \
+          --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
+          --cache-to=type=registry,ref=ghcr.io/${{ env.REPO }}:cache,mode=max \
           --push \
           --tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} . 
-        docker buildx imagetools inspect ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
        
   test:
     runs-on: robot-dind
