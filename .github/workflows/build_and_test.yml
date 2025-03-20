@@ -3,10 +3,10 @@ name: Build,test BNGBLASTER App and update chart, helm_chart version
 on:
   push:
     branches:
-      - test
+      - main
   pull_request:
     branches:
-      - test
+      - main
 
 jobs:
   build:
@@ -139,7 +139,7 @@ jobs:
         name: robot-test-report
         path: ./report.html
 
-        
+
   # update: 
   #   if: alway() ${{ github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job_name == 'update') }}
   #   needs: test
