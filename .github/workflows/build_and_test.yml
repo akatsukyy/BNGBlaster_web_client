@@ -108,6 +108,7 @@ jobs:
     # - name: Run Robot Framework tests
     #   run: robot tests/
 
+    
     - name: Delete image if test fail
       if: failure()
       run: |
