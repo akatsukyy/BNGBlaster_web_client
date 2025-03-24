@@ -16,13 +16,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Restore Trivy Cache
-      uses: actions/cache@v4
-      with:
-        path: ${{ github.workspace }}/.cache/trivy
-        key: trivy-cache-${{ runner.os }}
-        restore-keys: |
-          trivy-cache-${{ runner.os }}
+    # - name: Restore Trivy Cache
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: ${{ github.workspace }}/.cache/trivy
+    #     key: trivy-cache-${{ runner.os }}
+    #     restore-keys: |
+    #       trivy-cache-${{ runner.os }}
 
     - name: Downcase REPO
       run: |
@@ -103,12 +103,12 @@ jobs:
         body: |
           Hi ${{ github.event.head_commit.author.name }},
 
-          The recent build for commit ${{ github.event.head_commit.id }} has detected vulnerabilities
+          The recent build for commit ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.event.head_commit.id }} has detected vulnerabilities
 
           Please review the details and take appropriate action.
 
           View the full report here:
-            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}
 
           Best,
           SRE Team
@@ -121,17 +121,17 @@ jobs:
         echo "##[command] Show results for Image scanning"
         cat image_scanning_result.json
 
-    # - name: Upload Dockerfile scan results as artifact
-    #   if: always()
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: Dockerfile scanning result
-    #     path: dockerfile_scanning_result.json
+    - name: Upload Dockerfile scan results as artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Dockerfile scanning result
+        path: dockerfile_scanning_result.json
         
-    # - name: Upload Image scanning results as artifact
-    #   if: always()
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: Image scanning result
-    #     path: image_scanning_result.json
+    - name: Upload Image scanning results as artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Image scanning result
+        path: image_scanning_result.json
         
