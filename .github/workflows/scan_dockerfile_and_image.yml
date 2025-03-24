@@ -99,7 +99,7 @@ jobs:
         echo "job_id=$(cat job_id.txt)" >> $GITHUB_OUTPUT
 
     - name: Cat url
-      run: echo "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}/${{ steps.get_job_id.outputs.job_id }}"
+      run: echo "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ steps.get_job_id.outputs.job_id }}"
 
     # - name: Send mail to committer if detect vulnerability in Docker image
     #   if: failure()
