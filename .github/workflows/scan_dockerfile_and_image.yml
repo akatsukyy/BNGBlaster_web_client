@@ -63,7 +63,13 @@ jobs:
           SRE Team
         to: ${{ github.event.head_commit.author.email }}
         from: SRE-team
-        
+  
+    - name: Show results for Dockerfile scanning
+      if: always()
+      run: |
+        echo "##[command] Show results for Dockerfile scanning"
+        cat dockerfile_scanning_result.json
+  
     - name: Build image
       if: always()
       run: |
@@ -82,12 +88,6 @@ jobs:
         exit-code: '1'
         format: 'table'
         output: 'image_scanning_result.json'
-
-    - name: Show results for Dockerfile scanning
-      if: always()
-      run: |
-        echo "##[command] Show results for Dockerfile scanning"
-        cat dockerfile_scanning_result.json
 
     - name: Show results for Image scanning
       if: always()
