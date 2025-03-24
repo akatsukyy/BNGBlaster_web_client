@@ -16,14 +16,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # - name: Restore Trivy Cache
-    #   uses: actions/cache@v4
-    #   with:
-    #     path: ${{ github.workspace }}/.cache/trivy
-    #     key: trivy-cache-${{ runner.os }}
-    #     restore-keys: |
-    #       trivy-cache-${{ runner.os }}
-
     - name: Downcase REPO
       run: |
         echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
@@ -58,19 +50,20 @@ jobs:
         password: ${{secrets.MAIL_PASSWORD}}
         subject: "[ALERT] Vulnerabilities Found in Dockerfile"
         body: |
-          Hi ${{ github.event.head_commit.author.name }},
+          Chào người đẹp ${{ github.event.head_commit.author.name }},
 
-          The recent build for commit ${{ github.event.head_commit.id }} has detected vulnerabilities
-
-          Please review the details and take appropriate action.
+          Detected vulnerabilities for commit:
+          ${{ github.event.head_commit.id }}
 
           View the full report here:
-            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ steps.get_job_id.outputs.job_id }}
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ steps.get_job_id.outputs.job_id }}
+          
+          Please review the details and take appropriate action.
 
           Best,
           SRE Team
         to: kien.kim@svtech.com.vn
-        from: SRE-team
+        from: kien.kim@svtech.com.vn
   
     - name: Show results for Dockerfile scanning
       if: always()
@@ -109,19 +102,20 @@ jobs:
         password: ${{secrets.MAIL_PASSWORD}}
         subject: "[ALERT] Vulnerabilities Found in Docker Image"
         body: |
-          Hi ${{ github.event.head_commit.author.name }},
+          Chào người đẹp ${{ github.event.head_commit.author.name }},
 
-          The recent build for commit ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.event.head_commit.id }} has detected vulnerabilities
-
-          Please review the details and take appropriate action.
+          Detected vulnerabilities for commit:
+          ${{ github.event.head_commit.id }}
 
           View the full report here:
           ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ steps.get_job_id.outputs.job_id }}
+          
+          Please review the details and take appropriate action.
 
           Best,
           SRE Team
         to: kien.kim@svtech.com.vn
-        from: SRE-team
+        from: kien.kim@svtech.com.vn
 
     - name: Show results for Image scanning
       if: always()
