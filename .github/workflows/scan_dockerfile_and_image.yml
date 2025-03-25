@@ -73,11 +73,7 @@ jobs:
   
     - name: Build image
       if: always()
-      run: |
-        docker buildx build \
-          --cache-from=type=registry,ref=ghcr.io/${{ env.REPO }}:cache \
-          --load \
-          --tag bngblaster-app:latest .
+      run: docker build -t bngblaster-app:latest .
 
     - name: Scan Docker image
       if: always()
