@@ -46,7 +46,7 @@ jobs:
         server_address: smtp.gmail.com
         server_port: 465
         secure: true
-        username: ${{secrets.MAIL_USERNAME}}
+        username: ${{vars.MAIL_USERNAME}}
         password: ${{secrets.MAIL_PASSWORD}}
         subject: "[ALERT] Vulnerabilities Found in Dockerfile"
         body: |
@@ -62,7 +62,7 @@ jobs:
 
           Best,
           SRE Team
-        to: kien.kim@svtech.com.vn
+        to: ${{ github.event.head_commit.author.email }}
         from: kien.kim@svtech.com.vn
   
     - name: Show results for Dockerfile scanning
@@ -94,7 +94,7 @@ jobs:
         server_address: smtp.gmail.com
         server_port: 465
         secure: true
-        username: ${{secrets.MAIL_USERNAME}}
+        username: ${{vars.MAIL_USERNAME}}
         password: ${{secrets.MAIL_PASSWORD}}
         subject: "[ALERT] Vulnerabilities Found in Docker Image"
         body: |
@@ -110,7 +110,7 @@ jobs:
 
           Best,
           SRE Team
-        to: kien.kim@svtech.com.vn
+        to: ${{ github.event.head_commit.author.email }}
         from: kien.kim@svtech.com.vn
 
     - name: Show results for Image scanning

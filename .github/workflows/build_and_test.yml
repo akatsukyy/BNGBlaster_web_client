@@ -97,7 +97,6 @@ jobs:
     # - name: Run Robot Framework tests
     #   run: robot tests/
 
-    
     - name: Delete image if test fail
       if: failure()
       run: |
@@ -120,7 +119,7 @@ jobs:
       run: |
         docker tag ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} ghcr.io/${{ env.REPO }}:latest
         docker push ghcr.io/${{ env.REPO }}:latest
-
+        
     - name: 'Upload robot test result'
       if: always()
       uses: actions/upload-artifact@v4.6.0
