@@ -32,7 +32,7 @@ jobs:
       run: trivy version
   
     - name: Scan Dockerfile 
-      run: trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json ./Dockerfile
+      run: trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json --exit-code 1 ./Dockerfile
 
     - name: Send mail to committer if detect vulnerability in Dockerfile
       if: failure()
@@ -72,7 +72,7 @@ jobs:
 
     - name: Scan Docker image
       if: always()
-      run: trivy image --server http://10.98.7.14:7777 --severity HIGH,CRITICAL --format table --output image_scanning_result.json bngblaster-app:latest
+      run: trivy image --server http://10.98.7.14:7777 --severity HIGH,CRITICAL --format table --output image_scanning_result.json --exit-code 1 bngblaster-app:latest
 
     - name: Send mail to committer if detect vulnerability in Docker image
       if: failure()
