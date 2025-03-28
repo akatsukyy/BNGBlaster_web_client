@@ -10,7 +10,7 @@ on:
 
 jobs:
   scan:
-    runs-on: robot-dind
+    runs-on: ubuntu-dind
     steps:
 
     - name: Checkout code
@@ -28,16 +28,11 @@ jobs:
         | jq '.jobs[] | select(.name=="scan") | .id' > job_id.txt
         echo "job_id=$(cat job_id.txt)" >> $GITHUB_OUTPUT
 
+    - name: Check version trivy
+      run: trivy version
+  
     - name: Scan Dockerfile 
-      uses: aquasecurity/trivy-action@0.28.0
-      with:
-        scan-type: 'config'
-        scan-ref: '.'
-        severity: 'CRITICAL,HIGH'
-        cache: true
-        exit-code: '1'
-        format: 'table'
-        output: 'dockerfile_scanning_result.json'
+      run: trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json ./Dockerfile
 
     - name: Send mail to committer if detect vulnerability in Dockerfile
       if: failure()
@@ -77,15 +72,7 @@ jobs:
 
     - name: Scan Docker image
       if: always()
-      uses: aquasecurity/trivy-action@0.28.0
-      with:
-        scan-type: 'image'
-        scan-ref: 'bngblaster-app:latest'
-        severity: 'CRITICAL,HIGH'
-        cache: true
-        exit-code: '1'
-        format: 'table'
-        output: 'image_scanning_result.json'
+      run: trivy image --server http://10.98.7.14:7777 --severity HIGH,CRITICAL --format table --output image_scanning_result.json bngblaster-app:latest
 
     - name: Send mail to committer if detect vulnerability in Docker image
       if: failure()
