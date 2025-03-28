@@ -31,7 +31,7 @@ jobs:
 
     - name: Build image
       run: docker build -t ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }} .
-      
+
     - name: Run bngblaster app
       run: |
         docker run -d --name bngblaster-container -p 8505:8505 ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
@@ -54,6 +54,7 @@ jobs:
       if: success()
       run: docker push ghcr.io/${{ env.REPO }}:v1.${{ github.run_number }}
     
+      
   test:
     runs-on: robot-dind
     needs: build
