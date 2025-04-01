@@ -36,11 +36,17 @@ jobs:
     - name: Scan Dockerfile 
       id: scan_dockerfile
       run: |  
-        trivy config --severity HIGH,CRITICAL --exit-code 1 ./Dockerfile 
-        TRIVY_EXIT_CODE=$?
-        echo "TRIVY_EXIT_CODE=${TRIVY_EXIT_CODE}" >> $GITHUB_ENV
-      # continue-on-error: true
-      # continue-on-error: true
+        trivy config --severity HIGH,CRITICAL --exit-code 1 ./Dockerfile > trivy.log 2>&1 || true
+        EXIT_CODE=$?
+        echo "TRIVY_EXIT_CODE=$EXIT_CODE" | tee -a $GITHUB_ENV
+        if [[ "$EXIT_CODE" == "1" ]]; then
+          echo "scanning_fail=true" | tee -a $GITHUB_ENV $GITHUB_OUTPUT
+        else
+          echo "scanning_fail=false" | tee -a $GITHUB_ENV $GITHUB_OUTPUT
+        fi
+  
+    - name: Show Trivy Lo
+      run: cat trivy.log
 
     
     - name: Set scanning_fail flag
