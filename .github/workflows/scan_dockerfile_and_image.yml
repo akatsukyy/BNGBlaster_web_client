@@ -36,7 +36,8 @@ jobs:
       run: |  
         trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json --exit-code 1 ./Dockerfile
         EXIT_CODE=$?
-        echo "Exit code của trivy: $EXIT_CODE"
+        # echo "Exit code của trivy: $EXIT_CODE"
+        echo "EXIT_CODE=$?" >> $GITHUB_ENV
         if [[ EXIT_CODE -eq 1 ]]; then
           echo "scanning_fail=true" >> $GITHUB_OUTPUT
         else
@@ -49,6 +50,7 @@ jobs:
       run: |
         echo "${{ steps.scan_dockerfile.outputs.scanning_fail }}"
         echo "$EXIT_CODE"
+        echo "${{ env.EXIT_CODE }}"
 
     - name: Send mail to committer if detect vulnerability in Dockerfile
       if: steps.scan_dockerfile.outputs.scanning_fail == 'true'
