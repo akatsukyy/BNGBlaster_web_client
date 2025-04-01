@@ -45,8 +45,8 @@ jobs:
 
         VULN_LINE=$(grep -E "Failures: [0-9]+ \(HIGH: [0-9]+, CRITICAL: [0-9]+\)" dockerfile_scanning_result.json)
         
-        HIGH_COUNT=$(echo "$VULN_LINE" | awk -F'[:,)]' '{print $2}' | tr -d ' ')
-        CRITICAL_COUNT=$(echo "$VULN_LINE" | awk -F'[:,)]' '{print $5}' | tr -d ' ')
+        HIGH_COUNT=$(echo "$VULN_LINE" | awk -F'[(:,)]' '{print $4}' | tr -d ' ')
+        CRITICAL_COUNT=$(echo "$VULN_LINE" | awk -F'[(:,)]' '{print $6}' | tr -d ' ')
         TOTAL_VULNS=$((HIGH_COUNT + CRITICAL_COUNT))
         echo "HIGH vulnerabilities: $HIGH_COUNT"
         echo "CRITICAL vulnerabilities: $CRITICAL_COUNT"
