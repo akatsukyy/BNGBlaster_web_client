@@ -31,7 +31,7 @@ jobs:
     - name: Check version trivy
       run: |
         trivy version
-        trivy config --help
+        trivy --reset
   
     - name: Scan Dockerfile 
       id: scan_dockerfile
