@@ -47,7 +47,6 @@ jobs:
     - name: Echo scanning_fail
       if: always()
       run: |
-        echo "Exit code của trivy: $EXIT_CODE"
         echo "${{ steps.scan_dockerfile.outputs.scanning_fail }}"
 
     - name: Send mail to committer if detect vulnerability in Dockerfile
@@ -83,39 +82,51 @@ jobs:
         echo "${{ steps.scan_dockerfile.outputs.scanning_fail}}"
         cat dockerfile_scanning_result.json
   
-    # - name: Build image
-    #   if: always()
-    #   run: docker build -t bngblaster-app:latest .
+    - name: Build image
+      if: always()
+      run: docker build -t bngblaster-app:latest .
 
-    # - name: Scan Docker image
-    #   if: always()
-    #   run: trivy image --server http://10.98.7.14:7777 --severity HIGH,CRITICAL --format table --output image_scanning_result.json --exit-code 1 bngblaster-app:latest
+    - name: Scan Docker image
+      id: scan_docker_image
+      run: |
+        trivy image --server http://10.98.7.14:7777 --severity HIGH,CRITICAL --format table --output image_scanning_result.json --exit-code 1 ${{ env.IMAGE_NAME }}:latest
 
-    # - name: Send mail to committer if detect vulnerability in Docker image
-    #   if: failure()
-    #   uses: dawidd6/action-send-mail@v4
-    #   with:
-    #     server_address: smtp.gmail.com
-    #     server_port: 465
-    #     secure: true
-    #     username: ${{vars.MAIL_USERNAME}}
-    #     password: ${{secrets.MAIL_PASSWORD}}
-    #     subject: "[ALERT] Vulnerabilities Found in Docker Image"
-    #     body: |
-    #       Hello ${{ github.event.head_commit.author.name }},
+        if [[ $? -ne 0 ]]; then
+          echo "SCANNING_IMAGE_FAILED=true" >> $GITHUB_OUTPUT
+        fi
+      continue-on-error: true
 
-    #       Detected vulnerabilities for commit:
-    #       ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.event.head_commit.id }}
+    - name: Send mail to committer if detect vulnerability in Docker image
+      if: steps.scan_docker_image.outputs.SCANNING_IMAGE_FAILED == 'true'
+      uses: dawidd6/action-send-mail@v4
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        secure: true
+        username: ${{vars.MAIL_USERNAME}}
+        password: ${{secrets.MAIL_PASSWORD}}
+        subject: "[ALERT] Vulnerabilities Found in Docker Image"
+        body: |
+          Hello ${{ github.event.head_commit.author.name }},
 
-    #       View the full report here:
-    #       ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ steps.get_job_id.outputs.job_id }}
+          Detected vulnerabilities for commit:
+          ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.event.head_commit.id }}
+
+          View the full report here:
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ steps.get_job_id.outputs.job_id }}
           
-    #       Please review the details and take appropriate action.
+          Please review the details and take appropriate action.
 
-    #       Best,
-    #       SRE Team
-    #     to: ${{ github.event.head_commit.author.email }}
-    #     from: kien.kim@svtech.com.vn
+          Best,
+          SRE Team
+        to: ${{ github.event.head_commit.author.email }}
+        from: kien.kim@svtech.com.vn
+
+    - name: Show results for Image scanning
+      if: always()
+      run: |
+        echo "##[command] Show results for Image scanning"
+        cat image_scanning_result.json
 
     # - name: Show results for Image scanning
     #   run: |
