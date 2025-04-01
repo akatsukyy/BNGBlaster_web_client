@@ -46,7 +46,9 @@ jobs:
 
     - name: Echo scanning_fail
       if: always()
-      run: echo "${{ steps.scan_dockerfile.outputs.scanning_fail }}"
+      run: |
+        echo "Exit code của trivy: $EXIT_CODE"
+        echo "${{ steps.scan_dockerfile.outputs.scanning_fail }}"
 
     - name: Send mail to committer if detect vulnerability in Dockerfile
       # if: steps.scan_dockerfile.outputs.scanning_fail == 'true'
