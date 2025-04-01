@@ -36,9 +36,8 @@ jobs:
     - name: Scan Dockerfile 
       id: scan_dockerfile
       run: |  
-        trivy config --severity HIGH,CRITICAL --format table --output scan_result.txt ./Dockerfile
-        cat scan_result.txt
-        if grep -q -E 'HIGH|CRITICAL' scan_result.txt; then
+        trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json ./Dockerfile
+        if grep -q -E 'HIGH|CRITICAL' dockerfile_scanning_result.json; then
           echo "scanning_fail=true" >> $GITHUB_OUTPUT
         else
           echo "scanning_fail=false" >> $GITHUB_OUTPUT
@@ -71,26 +70,22 @@ jobs:
         from: kien.kim@svtech.com.vn
 
     - name: Show results for Dockerfile scanning
-      if: always()
       run: |
         echo "##[command] Show results for Dockerfile scanning"
-        cat dockerfile_scanning_result.txt
+        cat dockerfile_scanning_result.json
   
     - name: Build image
-      if: always()
       run: docker build -t bngblaster-app:latest .
 
     - name: Scan Docker image
-      if: always()
       id: scan_docker_image
       run: |
-        trivy image --server http://10.98.7.14:7777 --severity HIGH,CRITICAL --format table --output image_scanning_result.json --exit-code 1 ${{ env.IMAGE_NAME }}:latest
-
-        if [[ $? -ne 0 ]]; then
+        trivy image --server http://10.98.7.14:7777 --severity HIGH,CRITICAL --format table --output image_scanning_result.json ${{ env.IMAGE_NAME }}:latest
+        if grep -q -E 'HIGH|CRITICAL' image_scanning_result.json; then
           echo "SCANNING_IMAGE_FAILED=true" >> $GITHUB_OUTPUT
+        else
+          echo "SCANNING_IMAGE_FAILED=false" >> $GITHUB_OUTPUT
         fi
-      continue-on-error: true
-
     - name: Send mail to committer if detect vulnerability in Docker image
       if: steps.scan_docker_image.outputs.SCANNING_IMAGE_FAILED == 'true'
       uses: dawidd6/action-send-mail@v4
