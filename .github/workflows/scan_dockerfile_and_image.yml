@@ -48,9 +48,10 @@ jobs:
       if: always()
       run: |
         echo "${{ steps.scan_dockerfile.outputs.scanning_fail }}"
+        echo "$EXIT_CODE"
 
     - name: Send mail to committer if detect vulnerability in Dockerfile
-      # if: steps.scan_dockerfile.outputs.scanning_fail == 'true'
+      if: steps.scan_dockerfile.outputs.scanning_fail == 'true'
       uses: dawidd6/action-send-mail@v4
       with:
         server_address: smtp.gmail.com
@@ -79,7 +80,6 @@ jobs:
       if: always()
       run: |
         echo "##[command] Show results for Dockerfile scanning"
-        echo "${{ steps.scan_dockerfile.outputs.scanning_fail}}"
         cat dockerfile_scanning_result.json
   
     - name: Build image
