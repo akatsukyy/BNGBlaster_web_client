@@ -87,6 +87,7 @@ jobs:
       run: docker build -t bngblaster-app:latest .
 
     - name: Scan Docker image
+      if: always()
       id: scan_docker_image
       run: |
         trivy image --server http://10.98.7.14:7777 --severity HIGH,CRITICAL --format table --output image_scanning_result.json --exit-code 1 ${{ env.IMAGE_NAME }}:latest
