@@ -37,11 +37,12 @@ jobs:
         trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json --exit-code 1 ./Dockerfile
         if [[ $? -ne 0 ]]; then
           echo "SCANNING_DOCKERFILE_FAILED=true" >> $GITHUB_OUTPUT
+          echo $SCANNING_DOCKERFILE_FAILED
         fi
       continue-on-error: true
       
     - name: Send mail to committer if detect vulnerability in Dockerfile
-      if: steps.scan_dockerfile.outputs.SCANNING_DOCKERFILE_FAILED == 'true'
+      if: steps.scan_dockerfile.outputs.SCANNING_DOCKERFILE_FAILED
       uses: dawidd6/action-send-mail@v4
       with:
         server_address: smtp.gmail.com
