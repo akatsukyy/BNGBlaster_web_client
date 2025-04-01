@@ -40,9 +40,10 @@ jobs:
         else 
           echo "scanning_fail=false" >> $GITHUB_OUTPUT
         fi
-      continue-on-error: true
+      # continue-on-error: true
 
     - name: Echo scanning_fail
+      if: always()
       run: echo "${{ steps.scan_dockerfile.outputs.scanning_fail }}"
 
     - name: Send mail to committer if detect vulnerability in Dockerfile
