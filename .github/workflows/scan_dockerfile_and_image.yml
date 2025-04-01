@@ -33,7 +33,7 @@ jobs:
   
     - name: Scan Dockerfile 
       id: scan_dockerfile
-      run: 
+      run: |
         trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json --exit-code 1 ./Dockerfile
         if [[ $? -ne 0 ]]; then
           echo "SCANNING_DOCKERFILE_FAILED=true" >> $GITHUB_OUTPUT
@@ -106,7 +106,6 @@ jobs:
         from: kien.kim@svtech.com.vn
 
     - name: Show results for Image scanning
-      if: always()
       run: |
         echo "##[command] Show results for Image scanning"
         cat image_scanning_result.json
