@@ -34,7 +34,8 @@ jobs:
     - name: Scan Dockerfile 
       id: scan_dockerfile
       run: |  
-        trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json --exit-code 1 ./Dockerfile
+        # trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json --exit-code 1 ./Dockerfile
+        exit 1
         if [[ $? -ne 0 ]]; then
           echo "scanning_fail=true" >> $GITHUB_OUTPUT
         else 
