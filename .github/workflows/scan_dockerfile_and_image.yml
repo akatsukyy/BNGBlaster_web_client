@@ -33,9 +33,8 @@ jobs:
   
     - name: Scan Dockerfile 
       id: scan_dockerfile
-      shell: bash
       run: |  
-        trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json --exit-code 1 ./Dockerfile
+        trivy config --severity HIGH,CRITICAL --output dockerfile_scanning_result.json --exit-code 1 ./Dockerfile
         EXIT_CODE=$?
         # echo "Exit code của trivy: $EXIT_CODE"
         echo "EXIT_CODE=$?" >> $GITHUB_ENV
