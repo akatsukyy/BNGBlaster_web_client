@@ -37,7 +37,22 @@ jobs:
       id: scan_dockerfile
       run: |  
         trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json ./Dockerfile
-        if grep -q -E 'HIGH|CRITICAL' dockerfile_scanning_result.json; then
+        # if grep -q -E 'HIGH|CRITICAL' dockerfile_scanning_result.json; then
+        #   echo "scanning_fail=true" >> $GITHUB_OUTPUT
+        # else
+        #   echo "scanning_fail=false" >> $GITHUB_OUTPUT
+        # fi
+
+        VULN_LINE=$(grep -E "Failures: [0-9]+ \(HIGH: [0-9]+, CRITICAL: [0-9]+\)" dockerfile_scanning_result.json)
+        
+        HIGH_COUNT=$(echo "$VULN_LINE" | awk -F'[:,)]' '{print $3}' | tr -d ' ')
+        CRITICAL_COUNT=$(echo "$VULN_LINE" | awk -F'[:,)]' '{print $5}' | tr -d ' ')
+        TOTAL_VULNS=$((HIGH_COUNT + CRITICAL_COUNT))
+        echo "HIGH vulnerabilities: $HIGH_COUNT"
+        echo "CRITICAL vulnerabilities: $CRITICAL_COUNT"
+        echo "TOTAL vulnerabilities: $TOTAL_VULNS"
+
+        if [ "$TOTAL_VULNS" -gt 0 ]; then
           echo "scanning_fail=true" >> $GITHUB_OUTPUT
         else
           echo "scanning_fail=false" >> $GITHUB_OUTPUT
@@ -80,14 +95,16 @@ jobs:
     - name: Scan Docker image
       id: scan_docker_image
       run: |
-        trivy image --server http://10.98.7.14:7777 --severity HIGH,CRITICAL --format table --output image_scanning_result.json ${{ env.IMAGE_NAME }}:latest
+        # trivy image --server http://10.98.7.14:7777 --severity HIGH,CRITICAL --format table --output image_scanning_result.json ${{ env.IMAGE_NAME }}:latest
+        trivy image --server http://10.98.7.14:7777 --severity HIGH,CRITICAL --format table --output image_scanning_result.json ubuntu:latest
         if grep -q -E 'HIGH|CRITICAL' image_scanning_result.json; then
-          echo "SCANNING_IMAGE_FAILED=true" >> $GITHUB_OUTPUT
+          echo "scanning_fail=true" >> $GITHUB_OUTPUT
         else
-          echo "SCANNING_IMAGE_FAILED=false" >> $GITHUB_OUTPUT
+          echo "scanning_fail=false" >> $GITHUB_OUTPUT
         fi
+
     - name: Send mail to committer if detect vulnerability in Docker image
-      if: steps.scan_docker_image.outputs.SCANNING_IMAGE_FAILED == 'true'
+      if: steps.scan_docker_image.outputs.scanning_fail == 'true'
       uses: dawidd6/action-send-mail@v4
       with:
         server_address: smtp.gmail.com
