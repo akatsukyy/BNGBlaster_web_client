@@ -35,7 +35,9 @@ jobs:
       id: scan_dockerfile
       run: |  
         trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json --exit-code 1 ./Dockerfile
-        if [[ $? -eq 1 ]]; then
+        EXIT_CODE=$?
+        echo "Exit code của trivy: $EXIT_CODE"
+        if [[ EXIT_CODE -eq 1 ]]; then
           echo "scanning_fail=true" >> $GITHUB_OUTPUT
         else
           echo "scanning_fail=false" >> $GITHUB_OUTPUT
