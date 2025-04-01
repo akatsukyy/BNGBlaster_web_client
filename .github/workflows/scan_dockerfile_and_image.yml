@@ -34,26 +34,28 @@ jobs:
     - name: Scan Dockerfile 
       id: scan_dockerfile
       run: |  
-        trivy config --severity HIGH,CRITICAL --output dockerfile_scanning_result.json --exit-code 1 ./Dockerfile
-        EXIT_CODE=$?
-        # echo "Exit code của trivy: $EXIT_CODE"
-        echo "EXIT_CODE=$?" >> $GITHUB_ENV
-        if [[ $EXIT_CODE -eq 1 ]]; then
+        trivy config --severity HIGH,CRITICAL --exit-code 1 ./Dockerfile || echo "TRIVY_EXIT_CODE=1" >> $GITHUB_ENV
+        echo "TRIVY_EXIT_CODE=0" >> $GITHUB_ENV
+      continue-on-error: true
+      # continue-on-error: true
+
+    
+    - name: Set scanning_fail flag
+      id: set_scan_flag
+      run: |
+        if [[ "$TRIVY_EXIT_CODE" -eq 1 ]]; then
           echo "scanning_fail=true" >> $GITHUB_OUTPUT
         else
           echo "scanning_fail=false" >> $GITHUB_OUTPUT
         fi
-      # continue-on-error: true
 
-    - name: Echo scanning_fail
-      if: always()
+    - name: Debug scanning_fail
       run: |
-        echo "${{ steps.scan_dockerfile.outputs.scanning_fail }}"
-        echo "$EXIT_CODE"
-        echo "${{ env.EXIT_CODE }}"
+        echo "TRIVY_EXIT_CODE=${{ env.TRIVY_EXIT_CODE }}"
+        echo "scanning_fail=${{ steps.set_scan_flag.outputs.scanning_fail }}"
 
     - name: Send mail to committer if detect vulnerability in Dockerfile
-      if: steps.scan_dockerfile.outputs.scanning_fail == 'true'
+      if: steps.set_scan_flag.outputs.scanning_fail == 'true'
       uses: dawidd6/action-send-mail@v4
       with:
         server_address: smtp.gmail.com
