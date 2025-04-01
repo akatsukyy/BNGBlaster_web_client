@@ -3,10 +3,10 @@ name: Scan Dockerfile and Image
 on:
   push:
     branches:
-      - abc
+      - main
   pull_request:
     branches:
-      - abc
+      - main
 
 jobs:
   scan:
