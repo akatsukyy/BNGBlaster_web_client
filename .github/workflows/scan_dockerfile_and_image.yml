@@ -37,8 +37,10 @@ jobs:
         trivy config --severity HIGH,CRITICAL --format table --output dockerfile_scanning_result.json --exit-code 1 ./Dockerfile
         if [[ $? -eq 1 ]]; then
           echo "scanning_fail=true" >> $GITHUB_OUTPUT
+        else
+          echo "scanning_fail=false" >> $GITHUB_OUTPUT
         fi
-      continue-on-error: true
+      # continue-on-error: true
 
     - name: Echo scanning_fail
       run: echo "${{ steps.scan_dockerfile.outputs.scanning_fail }}"
